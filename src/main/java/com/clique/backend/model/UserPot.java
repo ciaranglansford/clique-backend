@@ -15,19 +15,12 @@ public class UserPot {
     private String walletAddress;
 
     @ManyToOne
-    @JoinColumn(name = "pot_id", nullable = false)
+    @JoinColumn(name = "contract_address", referencedColumnName = "contract_address", nullable = false)
     private Pot pot;
 
     @Column(name = "joined_at")
     private LocalDateTime joinedAt = LocalDateTime.now();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getWalletAddress() {
         return walletAddress;

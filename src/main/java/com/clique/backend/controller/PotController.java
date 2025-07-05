@@ -6,6 +6,9 @@ import com.clique.backend.controller.dtoResponse.JoinPotResponse;
 import com.clique.backend.model.Pot;
 import com.clique.backend.model.UserPot;
 import com.clique.backend.service.PotService;
+import com.clique.backend.service.UserPotService;
+import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,11 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/pots")
 public class PotController {
 
-    private final PotService potService;
-
-    public PotController(PotService potService) {
-        this.potService = potService;
-    }
+    @Autowired
+    private PotService potService;
+    @Autowired
+    private UserPotService userPotService;
 
     @PostMapping("/create")
     public ResponseEntity<Pot> createPot(@RequestBody CreatePotRequest request) {
@@ -29,9 +31,5 @@ public class PotController {
         return ResponseEntity.status(HttpStatus.CREATED).body(pot);
     }
 
-    @PostMapping("/join")
-    public ResponseEntity<JoinPotResponse> joinPot(@RequestBody JoinPotRequest request) {
-        UserPot userPot = potService.joinPot(request.getContractAddress(), request.getWalletAddress());
-        return ResponseEntity.ok(new JoinPotResponse(userPot));
-    }
+
 }

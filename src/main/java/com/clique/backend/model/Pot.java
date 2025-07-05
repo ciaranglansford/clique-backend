@@ -10,9 +10,6 @@ import java.util.List;
 @Table(name = "pots")
 public class Pot {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "contract_address", nullable = false, unique = true)
     private String contractAddress;
 
@@ -21,14 +18,6 @@ public class Pot {
 
     @OneToMany(mappedBy = "pot", cascade = CascadeType.ALL)
     private List<UserPot> userPots = new ArrayList<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getContractAddress() {
         return contractAddress;
