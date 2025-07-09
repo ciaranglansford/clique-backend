@@ -1,9 +1,11 @@
-package com.clique.backend.controller.dtoResponse;
+package com.clique.backend.data.response;
 
 import com.clique.backend.model.UserPot;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 public class JoinPotResponse {
     private String walletAddress;
     private LocalDateTime joinedAt;
@@ -11,13 +13,5 @@ public class JoinPotResponse {
     public JoinPotResponse(UserPot userPot) {
         this.walletAddress = userPot.getWalletAddress();
         this.joinedAt = userPot.getJoinedAt();
-    }
-
-    public String getWalletAddress() {
-        return walletAddress;
-    }
-
-    public LocalDateTime getJoinedAt() {
-        return joinedAt;
     }
 }

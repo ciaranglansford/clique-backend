@@ -1,4 +1,4 @@
-package com.clique.backend.Repository;
+package com.clique.backend.repo;
 
 import com.clique.backend.model.Pot;
 import org.springframework.data.jpa.repository.JpaRepository;

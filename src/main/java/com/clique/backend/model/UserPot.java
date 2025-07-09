@@ -1,10 +1,14 @@
 package com.clique.backend.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Data
+@Builder
 @Table(name = "user_pots")
 public class UserPot {
     @Id
@@ -22,27 +26,4 @@ public class UserPot {
     private LocalDateTime joinedAt = LocalDateTime.now();
 
 
-    public String getWalletAddress() {
-        return walletAddress;
-    }
-
-    public void setWalletAddress(String walletAddress) {
-        this.walletAddress = walletAddress;
-    }
-
-    public Pot getPot() {
-        return pot;
-    }
-
-    public void setPot(Pot pot) {
-        this.pot = pot;
-    }
-
-    public LocalDateTime getJoinedAt() {
-        return joinedAt;
-    }
-
-    public void setJoinedAt(LocalDateTime joinedAt) {
-        this.joinedAt = joinedAt;
-    }
 }

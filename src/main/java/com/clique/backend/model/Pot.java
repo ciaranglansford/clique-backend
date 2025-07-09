@@ -1,11 +1,13 @@
 package com.clique.backend.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "pots")
 public class Pot {
@@ -18,28 +20,4 @@ public class Pot {
 
     @OneToMany(mappedBy = "pot", cascade = CascadeType.ALL)
     private List<UserPot> userPots = new ArrayList<>();
-
-    public String getContractAddress() {
-        return contractAddress;
-    }
-
-    public void setContractAddress(String contractAddress) {
-        this.contractAddress = contractAddress;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public List<UserPot> getUserPots() {
-        return userPots;
-    }
-
-    public void setUserPots(List<UserPot> userPots) {
-        this.userPots = userPots;
-    }
 }
