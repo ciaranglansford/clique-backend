@@ -19,9 +19,8 @@ public class UserPotController {
     UserPotService userPotService;
 
     @GetMapping("/list")
-    public ResponseEntity<GetPotListResponse> getAllUserPots(@RequestBody GetUserPotRequest request){
-        //logic to get the list of pots for the given user wallet
-        PotContractList potContractList = userPotService.getAllUserPots(request.getWalletAddress());
+    public ResponseEntity<GetPotListResponse> getAllUserPots(@RequestParam String walletAddress) {
+        PotContractList potContractList = userPotService.getAllUserPots(walletAddress);
         return ResponseEntity.ok(new GetPotListResponse(potContractList));
     }
 
