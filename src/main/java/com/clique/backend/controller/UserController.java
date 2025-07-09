@@ -1,22 +1,21 @@
 package com.clique.backend.controller;
 
-import com.clique.backend.controller.dtoRequest.GetUserPotRequest;
-import com.clique.backend.controller.dtoRequest.JoinPotRequest;
-import com.clique.backend.controller.dtoResponse.GetPotListResponse;
-import com.clique.backend.controller.dtoResponse.JoinPotResponse;
+import com.clique.backend.data.request.JoinPotRequest;
+import com.clique.backend.data.response.GetPotListResponse;
+import com.clique.backend.data.response.JoinPotResponse;
 import com.clique.backend.model.PotContractList;
 import com.clique.backend.model.UserPot;
 import com.clique.backend.service.UserPotService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
-public class UserPotController {
+@RequiredArgsConstructor
+public class UserController {
 
-    @Autowired
-    UserPotService userPotService;
+    private final UserPotService userPotService;
 
     @GetMapping("/list")
     public ResponseEntity<GetPotListResponse> getAllUserPots(@RequestParam String walletAddress) {
@@ -26,7 +25,7 @@ public class UserPotController {
 
     @PostMapping("/join")
     public ResponseEntity<JoinPotResponse> joinPot(@RequestBody JoinPotRequest request) {
-        UserPot userPot = userPotService.joinPot(request.getContractAddress(), request.getWalletAddress());
+        UserPot userPot = userPotService.joinPot(request);
         return ResponseEntity.ok(new JoinPotResponse(userPot));
     }
 }

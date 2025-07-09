@@ -1,6 +1,5 @@
-package com.clique.backend.Repository;
+package com.clique.backend.repo;
 
-import com.clique.backend.model.PotContractList;
 import com.clique.backend.model.UserPot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
