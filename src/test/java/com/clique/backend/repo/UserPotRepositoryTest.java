@@ -42,4 +42,43 @@ class UserPotRepositoryTest {
         assertFalse(found.isEmpty());
         assertEquals("0xdef", found.get(0).getContractAddress());
     }
+
+    @Test
+    void save_shouldReturnSavedUserPot() {
+        UserPot userPot = UserPot.builder()
+                .walletAddress("wallet3")
+                .contractAddress("0xghi")
+                .joinedAt(LocalDateTime.now())
+                .build();
+        when(userPotRepository.save(userPot)).thenReturn(userPot);
+
+        UserPot saved = userPotRepository.save(userPot);
+
+        assertEquals("wallet3", saved.getWalletAddress());
+        verify(userPotRepository).save(userPot);
+    }
+
+    @Test
+    void findAll_shouldReturnListOfUserPots() {
+        UserPot userPot = UserPot.builder()
+                .walletAddress("wallet4")
+                .contractAddress("0xjkl")
+                .joinedAt(LocalDateTime.now())
+                .build();
+        when(userPotRepository.findAll()).thenReturn(List.of(userPot));
+
+        List<UserPot> userPots = userPotRepository.findAll();
+
+        assertEquals(1, userPots.size());
+        assertEquals("wallet4", userPots.get(0).getWalletAddress());
+    }
+
+    @Test
+    void deleteById_shouldInvokeDelete() {
+        doNothing().when(userPotRepository).deleteById("id123");
+
+        userPotRepository.deleteById("id123");
+
+        verify(userPotRepository).deleteById("id123");
+    }
 }

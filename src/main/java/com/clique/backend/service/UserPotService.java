@@ -8,6 +8,7 @@ import com.clique.backend.model.UserPot;
 import com.clique.backend.repo.UserPotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,5 +48,46 @@ public class UserPotService {
                 .map(UserPot::getContractAddress)
                 .collect(Collectors.toList());
         return new PotContractList(contracts);
+    }
+
+    public List<UserPot> getUsersByContractAddress(String contractAddress) {
+        if (contractAddress == null || contractAddress.isEmpty()) {
+            throw new ApiException("Contract address must not be empty");
+        }
+        potService.getPotByContractAddress(contractAddress);
+        return userPotRepository.findByContractAddress(contractAddress);
+    }
+
+    public void removeUserFromPot(String contractAddress, String walletAddress) {
+        if (contractAddress == null || contractAddress.isEmpty()) {
+            throw new ApiException("Contract address must not be empty");
+        }
+        if (walletAddress == null || walletAddress.isEmpty()) {
+            throw new ApiException("Wallet address must not be empty");
+        }
+
+        List<UserPot> userPots = userPotRepository.findByContractAddress(contractAddress);
+        userPots.stream()
+                .filter(up -> up.getWalletAddress().equals(walletAddress))
+                .findFirst()
+                .ifPresentOrElse(
+                        userPotRepository::delete,
+                        () -> {
+                            throw new ApiException("User not found in this pot");
+                        }
+                );
+    }
+
+    public boolean isUserInPot(String contractAddress, String walletAddress) {
+        if (contractAddress == null || contractAddress.isEmpty()) {
+            throw new ApiException("Contract address must not be empty");
+        }
+        if (walletAddress == null || walletAddress.isEmpty()) {
+            throw new ApiException("Wallet address must not be empty");
+        }
+
+        return userPotRepository.findByWalletAddress(walletAddress)
+                .stream()
+                .anyMatch(up -> up.getContractAddress().equals(contractAddress));
     }
 }
