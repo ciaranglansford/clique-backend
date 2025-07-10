@@ -1,29 +1,18 @@
 package com.clique.backend.model;
 
-import jakarta.persistence.*;
-import lombok.Builder;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
-
+import lombok.Builder;
 import java.time.LocalDateTime;
 
-@Entity
 @Data
 @Builder
-@Table(name = "user_pots")
+@Document(collection = "user_pots")
 public class UserPot {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "wallet_address", nullable = false)
+    private String id;
     private String walletAddress;
-
-    @ManyToOne
-    @JoinColumn(name = "contract_address", referencedColumnName = "contract_address", nullable = false)
-    private Pot pot;
-
-    @Column(name = "joined_at")
-    private LocalDateTime joinedAt = LocalDateTime.now();
-
-
+    private String contractAddress;
+    private LocalDateTime joinedAt;
 }
