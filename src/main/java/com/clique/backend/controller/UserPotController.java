@@ -1,6 +1,5 @@
 package com.clique.backend.controller;
 
-import com.clique.backend.data.request.JoinPotRequest;
 import com.clique.backend.exception.ApiException;
 import com.clique.backend.model.UserPot;
 import com.clique.backend.service.UserPotService;
@@ -53,13 +52,15 @@ public class UserPotController {
     /**
      * Removes a user from a pot.
      *
-     * @param request The request containing contract address and wallet address
+     * @param contractAddress The address of the pot contract
+     * @param walletAddress   The user's wallet address
      * @return Empty response with HTTP 204 No Content status
      * @throws ApiException if the user is not in the pot or addresses are invalid
      */
-    @DeleteMapping("/remove")
-    public ResponseEntity<Void> removeUserFromPot(@RequestBody JoinPotRequest request) {
-        userPotService.removeUserFromPot(request.getContractAddress(), request.getWalletAddress());
+    @DeleteMapping("/{contractAddress}/users/{walletAddress}")
+    public ResponseEntity<Void> removeUserFromPot(@PathVariable String contractAddress,
+                                                  @PathVariable String walletAddress) {
+        userPotService.removeUserFromPot(contractAddress, walletAddress);
         return ResponseEntity.noContent().build();
     }
 }
