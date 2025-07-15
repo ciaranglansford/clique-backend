@@ -24,8 +24,7 @@ class PotRepositoryIntegrationTest {
     @Test
     void saveAndFindByContractAddress_shouldWork() {
         // Arrange
-        Pot pot = new Pot();
-        pot.setContractAddress("0xabc");
+        Pot pot = createPot("0xabc");
 
         // Act
         potRepository.save(pot);
@@ -50,11 +49,8 @@ class PotRepositoryIntegrationTest {
         // Arrange
         potRepository.deleteAll(); // Clear any existing data
 
-        Pot pot1 = new Pot();
-        pot1.setContractAddress("0xabc1");
-
-        Pot pot2 = new Pot();
-        pot2.setContractAddress("0xabc2");
+        Pot pot1 = createPot("0xabc1");
+        Pot pot2 = createPot("0xabc2");
 
         potRepository.saveAll(List.of(pot1, pot2));
 
@@ -70,9 +66,8 @@ class PotRepositoryIntegrationTest {
     @Test
     void deletePot_shouldRemoveFromDatabase() {
         // Arrange
-        Pot pot = new Pot();
-        pot.setContractAddress("0xabc");
-        pot = potRepository.save(pot);
+        Pot pot = createPot("0xabc");
+        potRepository.save(pot);
 
         // Act
         potRepository.delete(pot);
@@ -84,8 +79,7 @@ class PotRepositoryIntegrationTest {
     @Test
     void updatePot_shouldUpdateFields() {
         // Arrange
-        Pot pot = new Pot();
-        pot.setContractAddress("0xabc");
+        Pot pot = createPot("0xabc");
         pot = potRepository.save(pot);
 
         // Act
@@ -93,7 +87,7 @@ class PotRepositoryIntegrationTest {
         potRepository.save(pot);
 
         // Assert
-        Optional<Pot> found = potRepository.findById(pot.getContractAddress());
+        Optional<Pot> found = potRepository.findByContractAddress("0xdef");
         assertTrue(found.isPresent());
         assertEquals("0xdef", found.get().getContractAddress());
     }
@@ -137,8 +131,8 @@ class PotRepositoryIntegrationTest {
     }
 
     private Pot createPot(String address) {
-        Pot pot = new Pot();
-        pot.setContractAddress(address);
-        return pot;
+        return Pot.builder()
+                .contractAddress(address)
+                .build();
     }
 }

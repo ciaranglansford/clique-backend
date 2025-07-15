@@ -1,6 +1,6 @@
 package com.clique.backend.repo;
 
-import com.clique.backend.model.UserPot;
+import com.clique.backend.model.PotEntry;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -9,20 +9,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class UserPotRepositoryTest {
+class PotEntryRepositoryTest {
 
-    private final UserPotRepository userPotRepository = mock(UserPotRepository.class);
+    private final PotEntryRepository potEntryRepository = mock(PotEntryRepository.class);
 
     @Test
     void findByWalletAddress_shouldReturnUserPots() {
-        UserPot userPot = UserPot.builder()
+        PotEntry potEntry = PotEntry.builder()
                 .walletAddress("wallet1")
                 .contractAddress("0xabc")
                 .joinedAt(LocalDateTime.now())
                 .build();
-        when(userPotRepository.findByWalletAddress("wallet1")).thenReturn(List.of(userPot));
+        when(potEntryRepository.findByWalletAddress("wallet1")).thenReturn(List.of(potEntry));
 
-        List<UserPot> found = userPotRepository.findByWalletAddress("wallet1");
+        List<PotEntry> found = potEntryRepository.findByWalletAddress("wallet1");
 
         assertFalse(found.isEmpty());
         assertEquals("wallet1", found.get(0).getWalletAddress());
@@ -30,14 +30,14 @@ class UserPotRepositoryTest {
 
     @Test
     void findByContractAddress_shouldReturnUserPots() {
-        UserPot userPot = UserPot.builder()
+        PotEntry potEntry = PotEntry.builder()
                 .walletAddress("wallet2")
                 .contractAddress("0xdef")
                 .joinedAt(LocalDateTime.now())
                 .build();
-        when(userPotRepository.findByContractAddress("0xdef")).thenReturn(List.of(userPot));
+        when(potEntryRepository.findByContractAddress("0xdef")).thenReturn(List.of(potEntry));
 
-        List<UserPot> found = userPotRepository.findByContractAddress("0xdef");
+        List<PotEntry> found = potEntryRepository.findByContractAddress("0xdef");
 
         assertFalse(found.isEmpty());
         assertEquals("0xdef", found.get(0).getContractAddress());
@@ -45,40 +45,40 @@ class UserPotRepositoryTest {
 
     @Test
     void save_shouldReturnSavedUserPot() {
-        UserPot userPot = UserPot.builder()
+        PotEntry potEntry = PotEntry.builder()
                 .walletAddress("wallet3")
                 .contractAddress("0xghi")
                 .joinedAt(LocalDateTime.now())
                 .build();
-        when(userPotRepository.save(userPot)).thenReturn(userPot);
+        when(potEntryRepository.save(potEntry)).thenReturn(potEntry);
 
-        UserPot saved = userPotRepository.save(userPot);
+        PotEntry saved = potEntryRepository.save(potEntry);
 
         assertEquals("wallet3", saved.getWalletAddress());
-        verify(userPotRepository).save(userPot);
+        verify(potEntryRepository).save(potEntry);
     }
 
     @Test
     void findAll_shouldReturnListOfUserPots() {
-        UserPot userPot = UserPot.builder()
+        PotEntry potEntry = PotEntry.builder()
                 .walletAddress("wallet4")
                 .contractAddress("0xjkl")
                 .joinedAt(LocalDateTime.now())
                 .build();
-        when(userPotRepository.findAll()).thenReturn(List.of(userPot));
+        when(potEntryRepository.findAll()).thenReturn(List.of(potEntry));
 
-        List<UserPot> userPots = userPotRepository.findAll();
+        List<PotEntry> potEntries = potEntryRepository.findAll();
 
-        assertEquals(1, userPots.size());
-        assertEquals("wallet4", userPots.get(0).getWalletAddress());
+        assertEquals(1, potEntries.size());
+        assertEquals("wallet4", potEntries.get(0).getWalletAddress());
     }
 
     @Test
     void deleteById_shouldInvokeDelete() {
-        doNothing().when(userPotRepository).deleteById("id123");
+        doNothing().when(potEntryRepository).deleteById("id123");
 
-        userPotRepository.deleteById("id123");
+        potEntryRepository.deleteById("id123");
 
-        verify(userPotRepository).deleteById("id123");
+        verify(potEntryRepository).deleteById("id123");
     }
 }

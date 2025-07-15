@@ -1,8 +1,9 @@
 package com.clique.backend.controller;
 
+import com.clique.backend.exception.ErrorResponse;
 import com.clique.backend.exception.ApiException;
-import com.clique.backend.model.UserPot;
-import com.clique.backend.service.UserPotService;
+import com.clique.backend.model.PotEntry;
+import com.clique.backend.service.PotEntryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user-pots")
 @RequiredArgsConstructor
-public class UserPotController {
+public class PotEntryController {
 
-    private final UserPotService userPotService;
+    private final PotEntryService potEntryService;
 
     /**
      * Retrieves all users who have joined a specific pot.
@@ -29,9 +30,13 @@ public class UserPotController {
      * @throws ApiException if the contract address is invalid or the pot doesn't exist
      */
     @GetMapping("/by-contract/{contractAddress}")
-    public ResponseEntity<List<UserPot>> getUsersByContract(@PathVariable String contractAddress) {
-        List<UserPot> userPots = userPotService.getUsersByContractAddress(contractAddress);
-        return ResponseEntity.ok(userPots);
+    public ResponseEntity<?> getUsersByContract(@PathVariable String contractAddress) {
+        try {
+            List<PotEntry> potEntries = potEntryService.getUsersByContractAddress(contractAddress);
+            return ResponseEntity.ok(potEntries);
+        } catch (ApiException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", e.getMessage()));
+        }
     }
 
     /**
@@ -43,10 +48,14 @@ public class UserPotController {
      * @throws ApiException if either address is invalid
      */
     @GetMapping("/check")
-    public ResponseEntity<Boolean> isUserInPot(@RequestParam String contractAddress,
-                                               @RequestParam String walletAddress) {
-        boolean isInPot = userPotService.isUserInPot(contractAddress, walletAddress);
-        return ResponseEntity.ok(isInPot);
+    public ResponseEntity<?> isUserInPot(@RequestParam String contractAddress,
+                                         @RequestParam String walletAddress) {
+        try {
+            boolean isInPot = potEntryService.isUserInPot(contractAddress, walletAddress);
+            return ResponseEntity.ok(isInPot);
+        } catch (ApiException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", e.getMessage()));
+        }
     }
 
     /**
@@ -58,9 +67,13 @@ public class UserPotController {
      * @throws ApiException if the user is not in the pot or addresses are invalid
      */
     @DeleteMapping("/{contractAddress}/users/{walletAddress}")
-    public ResponseEntity<Void> removeUserFromPot(@PathVariable String contractAddress,
-                                                  @PathVariable String walletAddress) {
-        userPotService.removeUserFromPot(contractAddress, walletAddress);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> removeUserFromPot(@PathVariable String contractAddress,
+                                               @PathVariable String walletAddress) {
+        try {
+            potEntryService.removeUserFromPot(contractAddress, walletAddress);
+            return ResponseEntity.noContent().build();
+        } catch (ApiException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", e.getMessage()));
+        }
     }
 }

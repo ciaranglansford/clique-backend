@@ -1,8 +1,8 @@
 package com.clique.backend.controller;
 
 import com.clique.backend.exception.ApiException;
-import com.clique.backend.model.UserPot;
-import com.clique.backend.service.UserPotService;
+import com.clique.backend.model.PotEntry;
+import com.clique.backend.service.PotEntryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,14 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserPotController.class)
-class UserPotControllerTest {
+@WebMvcTest(PotEntryController.class)
+class PotEntryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private UserPotService userPotService;
+    private PotEntryService potEntryService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -35,11 +35,11 @@ class UserPotControllerTest {
     @Test
     void getUsersByContract_shouldReturnUserList() throws Exception {
         String contractAddress = "0xabc123";
-        List<UserPot> userPots = List.of(
+        List<PotEntry> potEntries = List.of(
                 createUserPot("0xwallet1", contractAddress),
                 createUserPot("0xwallet2", contractAddress)
         );
-        when(userPotService.getUsersByContractAddress(contractAddress)).thenReturn(userPots);
+        when(potEntryService.getUsersByContractAddress(contractAddress)).thenReturn(potEntries);
 
         mockMvc.perform(get("/api/user-pots/by-contract/{contractAddress}", contractAddress))
                 .andExpect(status().isOk())
@@ -50,7 +50,7 @@ class UserPotControllerTest {
     @Test
     void getUsersByContract_shouldReturnEmptyList() throws Exception {
         String contractAddress = "0xempty";
-        when(userPotService.getUsersByContractAddress(contractAddress)).thenReturn(Collections.emptyList());
+        when(potEntryService.getUsersByContractAddress(contractAddress)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/user-pots/by-contract/{contractAddress}", contractAddress))
                 .andExpect(status().isOk())
@@ -62,7 +62,7 @@ class UserPotControllerTest {
     void isUserInPot_whenUserIsInPot_shouldReturnTrue() throws Exception {
         String contractAddress = "0xabc123";
         String walletAddress = "0xwallet1";
-        when(userPotService.isUserInPot(contractAddress, walletAddress)).thenReturn(true);
+        when(potEntryService.isUserInPot(contractAddress, walletAddress)).thenReturn(true);
 
         mockMvc.perform(get("/api/user-pots/check")
                         .param("contractAddress", contractAddress)
@@ -75,7 +75,7 @@ class UserPotControllerTest {
     void isUserInPot_whenUserIsNotInPot_shouldReturnFalse() throws Exception {
         String contractAddress = "0xabc123";
         String walletAddress = "0xwallet2";
-        when(userPotService.isUserInPot(contractAddress, walletAddress)).thenReturn(false);
+        when(potEntryService.isUserInPot(contractAddress, walletAddress)).thenReturn(false);
 
         mockMvc.perform(get("/api/user-pots/check")
                         .param("contractAddress", contractAddress)
@@ -89,13 +89,13 @@ class UserPotControllerTest {
         String contractAddress = "0xabc123";
         String walletAddress = "0xwallet1";
 
-        doNothing().when(userPotService).removeUserFromPot(anyString(), anyString());
+        doNothing().when(potEntryService).removeUserFromPot(anyString(), anyString());
 
         mockMvc.perform(delete("/api/user-pots/{contractAddress}/users/{walletAddress}",
                         contractAddress, walletAddress))
                 .andExpect(status().isNoContent());
 
-        verify(userPotService).removeUserFromPot(eq(contractAddress), eq(walletAddress));
+        verify(potEntryService).removeUserFromPot(eq(contractAddress), eq(walletAddress));
     }
 
     @Test
@@ -104,16 +104,16 @@ class UserPotControllerTest {
         String walletAddress = "0xwallet3";
 
         doThrow(new ApiException("User not found in this pot"))
-                .when(userPotService).removeUserFromPot(eq(contractAddress), eq(walletAddress));
+                .when(potEntryService).removeUserFromPot(eq(contractAddress), eq(walletAddress));
 
         mockMvc.perform(delete("/api/user-pots/{contractAddress}/users/{walletAddress}",
                         contractAddress, walletAddress))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User not found in this pot"));
+                .andExpect(jsonPath("$.message").value("User not found in this pot"));
     }
 
-    private UserPot createUserPot(String walletAddress, String contractAddress) {
-        return UserPot.builder()
+    private PotEntry createUserPot(String walletAddress, String contractAddress) {
+        return PotEntry.builder()
                 .id("id-" + walletAddress)
                 .walletAddress(walletAddress)
                 .contractAddress(contractAddress)
