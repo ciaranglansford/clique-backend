@@ -1,14 +1,16 @@
 package com.clique.backend.controller;
 
 import com.clique.backend.data.request.JoinPotRequest;
-import com.clique.backend.data.response.GetPotListResponse;
+import com.clique.backend.exception.ErrorResponse;
 import com.clique.backend.data.response.JoinPotResponse;
 import com.clique.backend.exception.ApiException;
 import com.clique.backend.model.PotContractList;
-import com.clique.backend.model.UserPot;
-import com.clique.backend.service.UserPotService;
+import com.clique.backend.model.PotEntry;
+import com.clique.backend.service.PotEntryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,9 +20,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
-    private final UserPotService userPotService;
+    private final PotEntryService potEntryService;
 
     /**
      * Retrieves all pots that a user has joined.
@@ -30,9 +33,9 @@ public class UserController {
      * @throws ApiException if the wallet address is invalid
      */
     @GetMapping("/list")
-    public ResponseEntity<GetPotListResponse> getAllUserPots(@RequestParam String walletAddress) {
-        PotContractList potContractList = userPotService.getAllUserPots(walletAddress);
-        return ResponseEntity.ok(new GetPotListResponse(potContractList));
+    public ResponseEntity<PotContractList> getAllUserPots(@RequestParam String walletAddress) {
+        PotContractList potContractList = potEntryService.getAllPotEntries(walletAddress);
+        return ResponseEntity.ok(potContractList);
     }
 
     /**
@@ -43,8 +46,16 @@ public class UserController {
      * @throws ApiException if the user is already in the pot or if addresses are invalid
      */
     @PostMapping("/join")
-    public ResponseEntity<JoinPotResponse> joinPot(@RequestBody JoinPotRequest request) {
-        UserPot userPot = userPotService.joinPot(request);
-        return ResponseEntity.ok(new JoinPotResponse(userPot));
+    public ResponseEntity<?> joinPot(@Valid @RequestBody JoinPotRequest request) {
+        try {
+            PotEntry potEntry = potEntryService.joinPot(request);
+
+            return ResponseEntity.ok(JoinPotResponse.builder()
+                    .walletAddress(potEntry.getWalletAddress())
+                    .joinedAt(potEntry.getJoinedAt())
+                    .build());
+        } catch (ApiException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", e.getMessage()));
+        }
     }
 }

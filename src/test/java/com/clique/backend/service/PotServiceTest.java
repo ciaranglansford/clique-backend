@@ -1,51 +1,92 @@
 package com.clique.backend.service;
 
+import com.clique.backend.data.request.CreatePotRequest;
+import com.clique.backend.data.response.CreatePotResponse;
 import com.clique.backend.exception.ApiException;
 import com.clique.backend.model.Pot;
 import com.clique.backend.repo.PotRepository;
+import com.clique.backend.util.TestUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.Collections;
 import java.util.List;
 
+import static com.clique.backend.util.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PotServiceTest {
 
-    private final PotRepository potRepository = mock(PotRepository.class);
-    private final PotService potService = new PotService(potRepository);
+    private PotRepository potRepository;
+    private PotService potService;
+
+    @BeforeEach
+    void setUp() {
+        potRepository = mock(PotRepository.class);
+        potService = new PotService(potRepository);
+    }
 
     @Test
-    void createPot_shouldSavePot() {
-        String contractAddress = "0x123";
-        when(potRepository.findByContractAddress(contractAddress)).thenReturn(Optional.empty());
-        when(potRepository.save(any(Pot.class))).thenAnswer(i -> i.getArgument(0));
+    void createPot_shouldCreatePot() {
+        CreatePotRequest request = TestUtil.getCreatePotRequest();
+        Pot pot = Pot.createPotFromRequest(request);
+        when(potRepository.findByContractAddress(CONTRACT_ADDRESS)).thenReturn(Optional.empty());
+        when(potRepository.save(any(Pot.class))).thenReturn(pot);
 
-        Pot pot = potService.createPot(contractAddress);
+        CreatePotResponse response = potService.createPot(request);
 
-        assertEquals(contractAddress, pot.getContractAddress());
-        verify(potRepository).save(any(Pot.class));
+        assertEquals(CONTRACT_ADDRESS, response.getContractAddress());
+        assertEquals(MAX_PLAYERS, response.getMaxPlayers());
+        assertEquals(CURRENCY_TYPE, response.getCurrencyType());
+        assertEquals(ENTRY_AMOUNT, response.getEntryAmount());
+        assertEquals(pot.getCreatedAt(), response.getCreatedAt());
     }
 
     @Test
     void createPot_shouldThrowIfExists() {
-        String contractAddress = "0x123";
-        when(potRepository.findByContractAddress(contractAddress)).thenReturn(Optional.of(new Pot()));
+        CreatePotRequest potRequest = TestUtil.getCreatePotRequest();
+        Pot pot = createPot();
+        when(potRepository.findByContractAddress(CONTRACT_ADDRESS)).thenReturn(Optional.of(pot));
 
-        assertThrows(ApiException.class, () -> potService.createPot(contractAddress));
+        assertThrows(ApiException.class, () -> potService.createPot(potRequest));
+    }
+
+    @Test
+    void createPot_shouldThrowIfAddressIsEmpty() {
+        CreatePotRequest potRequest = TestUtil.getCreatePotRequest();
+        potRequest.setContractAddress("");
+
+        assertThrows(ApiException.class, () -> potService.createPot(potRequest));
+    }
+
+    @Test
+    void getPotByContractAddress_shouldReturnPot() {
+        Pot pot = createPot();
+        when(potRepository.findByContractAddress(CONTRACT_ADDRESS)).thenReturn(Optional.of(pot));
+
+        Pot result = potService.getPotByContractAddress(CONTRACT_ADDRESS);
+        assertEquals(CONTRACT_ADDRESS, result.getContractAddress());
+    }
+
+    @Test
+    void getPotByContractAddress_shouldThrowIfNotFound() {
+        when(potRepository.findByContractAddress(CONTRACT_ADDRESS)).thenReturn(Optional.empty());
+
+        assertThrows(ApiException.class, () -> potService.getPotByContractAddress(CONTRACT_ADDRESS));
     }
 
     @Test
     void getAllContractAddresses_shouldReturnList() {
-        Pot pot = new Pot();
-        pot.setContractAddress("0x123");
+        Pot pot = createPot();
         when(potRepository.findAll()).thenReturn(Collections.singletonList(pot));
 
         List<String> result = potService.getAllContractAddresses();
 
         assertEquals(1, result.size());
-        assertEquals("0x123", result.get(0));
+        assertEquals(CONTRACT_ADDRESS, result.get(0));
     }
+
+
 }

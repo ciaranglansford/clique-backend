@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Document(collection = "user_pots")
-public class UserPot {
+@Document(collection = "pot_entry")
+public class PotEntry {
     @Id
     private String id;
     private String walletAddress;

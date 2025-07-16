@@ -2,8 +2,8 @@ package com.clique.backend.controller;
 
 import com.clique.backend.data.request.JoinPotRequest;
 import com.clique.backend.model.PotContractList;
-import com.clique.backend.model.UserPot;
-import com.clique.backend.service.UserPotService;
+import com.clique.backend.model.PotEntry;
+import com.clique.backend.service.PotEntryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,29 +27,29 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private UserPotService userPotService;
+    private PotEntryService potEntryService;
 
     @Test
     void getAllUserPots_shouldReturnPotList() throws Exception {
         PotContractList potContractList = new PotContractList(List.of("0xabc", "0xdef"));
-        when(userPotService.getAllUserPots("wallet1")).thenReturn(potContractList);
+        when(potEntryService.getAllPotEntries("wallet1")).thenReturn(potContractList);
 
         mockMvc.perform(get("/api/user/list")
                         .param("walletAddress", "wallet1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.potList[0]").value("0xabc"))
-                .andExpect(jsonPath("$.potList[1]").value("0xdef"));
+                .andExpect(jsonPath("$.contractAddresses[0]").value("0xabc"))
+                .andExpect(jsonPath("$.contractAddresses[1]").value("0xdef"));
     }
 
     @Test
     void joinPot_shouldReturnJoinPotResponse() throws Exception {
-        UserPot userPot = UserPot.builder()
+        PotEntry potEntry = PotEntry.builder()
                 .walletAddress("wallet1")
                 .contractAddress("0xabc")
                 .joinedAt(LocalDateTime.of(2024, 1, 1, 12, 0))
                 .build();
 
-        when(userPotService.joinPot(any(JoinPotRequest.class))).thenReturn(userPot);
+        when(potEntryService.joinPot(any(JoinPotRequest.class))).thenReturn(potEntry);
 
         String json = "{\"walletAddress\":\"wallet1\",\"contractAddress\":\"0xabc\"}";
 

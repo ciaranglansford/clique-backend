@@ -1,7 +1,7 @@
 package com.clique.backend.repo;
 
 import com.clique.backend.config.MongoTestConfiguration;
-import com.clique.backend.model.UserPot;
+import com.clique.backend.model.PotEntry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -13,41 +13,42 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+import static com.clique.backend.util.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
 @ActiveProfiles("test")
 @Import(MongoTestConfiguration.class)
-class UserPotRepositoryIntegrationTest {
+class PotEntryRepositoryIntegrationTest {
 
     @Autowired
-    private UserPotRepository userPotRepository;
+    private PotEntryRepository potEntryRepository;
 
     @Test
     void saveAndFindById_shouldWork() {
         // Arrange
-        UserPot userPot = createUserPot("0xcontract1", "0xwallet1");
+        PotEntry potEntry = createUserPot(CONTRACT_ADDRESS, WALLET_ADDRESS);
 
         // Act
-        userPot = userPotRepository.save(userPot);
-        Optional<UserPot> found = userPotRepository.findById(userPot.getId());
+        PotEntry savedPotEntry = potEntryRepository.save(potEntry);
+        Optional<PotEntry> found = potEntryRepository.findById(savedPotEntry.getId());
 
         // Assert
         assertTrue(found.isPresent());
-        assertEquals("0xcontract1", found.get().getContractAddress());
-        assertEquals("0xwallet1", found.get().getWalletAddress());
+        assertEquals(CONTRACT_ADDRESS, found.get().getContractAddress());
+        assertEquals(WALLET_ADDRESS, found.get().getWalletAddress());
     }
 
     @Test
     void findByWalletAddress_shouldWork() {
         // Arrange
-        userPotRepository.deleteAll();
-        userPotRepository.save(createUserPot("0xcontract1", "0xwallet1"));
-        userPotRepository.save(createUserPot("0xcontract2", "0xwallet1"));
-        userPotRepository.save(createUserPot("0xcontract3", "0xwallet2"));
+        potEntryRepository.deleteAll();
+        potEntryRepository.save(createUserPot("0xcontract1", "0xwallet1"));
+        potEntryRepository.save(createUserPot("0xcontract2", "0xwallet1"));
+        potEntryRepository.save(createUserPot("0xcontract3", "0xwallet2"));
 
         // Act
-        List<UserPot> found = userPotRepository.findByWalletAddress("0xwallet1");
+        List<PotEntry> found = potEntryRepository.findByWalletAddress("0xwallet1");
 
         // Assert
         assertEquals(2, found.size());
@@ -57,13 +58,13 @@ class UserPotRepositoryIntegrationTest {
     @Test
     void findByContractAddress_shouldWork() {
         // Arrange
-        userPotRepository.deleteAll();
-        userPotRepository.save(createUserPot("0xcontract1", "0xwallet1"));
-        userPotRepository.save(createUserPot("0xcontract1", "0xwallet2"));
-        userPotRepository.save(createUserPot("0xcontract2", "0xwallet3"));
+        potEntryRepository.deleteAll();
+        potEntryRepository.save(createUserPot("0xcontract1", "0xwallet1"));
+        potEntryRepository.save(createUserPot("0xcontract1", "0xwallet2"));
+        potEntryRepository.save(createUserPot("0xcontract2", "0xwallet3"));
 
         // Act
-        List<UserPot> found = userPotRepository.findByContractAddress("0xcontract1");
+        List<PotEntry> found = potEntryRepository.findByContractAddress("0xcontract1");
 
         // Assert
         assertEquals(2, found.size());
@@ -73,35 +74,34 @@ class UserPotRepositoryIntegrationTest {
     @Test
     void deleteUserPot_shouldRemoveFromDatabase() {
         // Arrange
-        UserPot userPot = createUserPot("0xcontract", "0xwallet");
-        userPot = userPotRepository.save(userPot);
-        String id = userPot.getId();
+        PotEntry potEntry = potEntryRepository.save(createUserPot("0xcontract", "0xwallet"));
+        String id = potEntry.getId();
 
         // Act
-        userPotRepository.delete(userPot);
+        potEntryRepository.delete(potEntry);
 
         // Assert
-        assertFalse(userPotRepository.findById(id).isPresent());
+        assertFalse(potEntryRepository.findById(id).isPresent());
     }
 
     @Test
     void updateUserPot_shouldUpdateFields() {
         // Arrange
-        UserPot userPot = createUserPot("0xcontract", "0xwallet");
-        userPot = userPotRepository.save(userPot);
+        PotEntry potEntry = createUserPot("0xcontract", "0xwallet");
+        potEntry = potEntryRepository.save(potEntry);
         LocalDateTime newTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.MILLIS);
 
         // Act
-        UserPot updatedPot = UserPot.builder()
-                .id(userPot.getId())
-                .contractAddress(userPot.getContractAddress())
-                .walletAddress(userPot.getWalletAddress())
+        PotEntry updatedPot = PotEntry.builder()
+                .id(potEntry.getId())
+                .contractAddress(potEntry.getContractAddress())
+                .walletAddress(potEntry.getWalletAddress())
                 .joinedAt(newTime)
                 .build();
-        userPotRepository.save(updatedPot);
+        potEntryRepository.save(updatedPot);
 
         // Assert
-        Optional<UserPot> found = userPotRepository.findById(userPot.getId());
+        Optional<PotEntry> found = potEntryRepository.findById(potEntry.getId());
         assertTrue(found.isPresent());
 
         // Compare truncated timestamps to avoid precision issues
@@ -114,46 +114,38 @@ class UserPotRepositoryIntegrationTest {
     @Test
     void countUserPots_shouldReturnCorrectNumber() {
         // Arrange
-        userPotRepository.deleteAll();
-        userPotRepository.saveAll(List.of(
+        potEntryRepository.deleteAll();
+        potEntryRepository.saveAll(List.of(
                 createUserPot("0xcontract1", "0xwallet1"),
                 createUserPot("0xcontract2", "0xwallet2"),
                 createUserPot("0xcontract3", "0xwallet3")
         ));
 
         // Act & Assert
-        assertEquals(3, userPotRepository.count());
+        assertEquals(3, potEntryRepository.count());
     }
 
     @Test
     void batchOperations_shouldWorkCorrectly() {
         // Arrange
-        userPotRepository.deleteAll();
+        potEntryRepository.deleteAll();
 
-        List<UserPot> userPots = List.of(
+        List<PotEntry> potEntries = List.of(
                 createUserPot("0xcontract1", "0xwallet1"),
                 createUserPot("0xcontract2", "0xwallet2"),
                 createUserPot("0xcontract3", "0xwallet3")
         );
 
         // Act - saveAll
-        userPotRepository.saveAll(userPots);
+        potEntryRepository.saveAll(potEntries);
 
         // Assert
-        assertEquals(3, userPotRepository.count());
+        assertEquals(3, potEntryRepository.count());
 
         // Act - deleteAll
-        userPotRepository.deleteAll();
+        potEntryRepository.deleteAll();
 
         // Assert
-        assertEquals(0, userPotRepository.count());
-    }
-
-    private UserPot createUserPot(String contractAddress, String walletAddress) {
-        return UserPot.builder()
-                .contractAddress(contractAddress)
-                .walletAddress(walletAddress)
-                .joinedAt(LocalDateTime.now())
-                .build();
+        assertEquals(0, potEntryRepository.count());
     }
 }

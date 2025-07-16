@@ -1,15 +1,15 @@
 package com.clique.backend.data.response;
 
-import com.clique.backend.model.PotContractList;
+import com.clique.backend.model.Pot;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class GetPotListResponse {
-    private List<String> potList;
-
-    public GetPotListResponse(PotContractList potContractList){
-        this.potList = potContractList.getContractAddresses();
-    }
+    private List<Pot> potList;
 }
